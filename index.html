@@ -218,6 +218,9 @@
                 })
             };
             warriorLevels = [];
+            document.getElementById("warriors").innerHTML = '';
+            document.getElementById("nonSafe").innerHTML = '';
+            document.getElementById("safe").innerHTML = '';
             let meFetch = await fetch('https://api.simple-mmo.com/v1/player/me', params);
             // TODO: get ratelimit headers working
             /*console.log(meFetch.headers)
