@@ -197,6 +197,7 @@
 <body>
     <script>
         const tabs = [["your", "sgl"], ["warriors", "nonSafe", "safe"]];
+        let firstLoad = true;
         let warriorLevels = [];
         function changeTab(bar_id, tab_id, style) {
             for (const tab of tabs[bar_id]) {
@@ -217,10 +218,14 @@
                     api_key: apikey
                 })
             };
-            warriorLevels = [];
-            document.getElementById("warriors").innerHTML = '';
-            document.getElementById("nonSafe").innerHTML = '';
-            document.getElementById("safe").innerHTML = '';
+            if (!firstLoad) {
+                document.getElementById("warriors").innerHTML = '';
+                document.getElementById("nonSafe").innerHTML = '';
+                document.getElementById("safe").innerHTML = '';
+                warriorLevels = [];
+            }
+            
+            
             let meFetch = await fetch('https://api.simple-mmo.com/v1/player/me', params);
             // TODO: get ratelimit headers working
             /*console.log(meFetch.headers)
@@ -269,7 +274,9 @@
                     api_key: apikey
                 })
             };
-            document.getElementById("sglFetched").innerHTML = '';
+            if (!firstLoad) {
+                document.getElementById("sglFetched").innerHTML = '';
+            }
             const sglFetch = await fetch(`https://api.simple-mmo.com/v1/guilds/seasons/${season}`, params);
             const sgl = await sglFetch.json();
             const rankTemplate = `
@@ -376,6 +383,7 @@
             }
             await getOwnGuildInformation();
             await getSGL();
+            firstLoad = false;
         }
 
         begin();
