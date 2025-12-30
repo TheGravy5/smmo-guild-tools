@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
     <title>SMMO Guild Tools</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         body {
             color: white;
@@ -16,7 +17,7 @@
             p {
                 padding-right: 48px;
             }
-            button {
+            a, button {
                 background-color: rgb(10, 10, 10);
                 color: white;
                 transition-duration: 100ms;
@@ -24,8 +25,10 @@
                 padding: 8px;
                 margin: 0;
                 cursor: pointer;
+                text-decoration: none;
+                font-size: 12px;
             }
-            button:hover {
+            a:hover, button:hover {
                 background-color: rgb(25, 25, 25);
                 transition-duration: 100ms;
                 
@@ -123,6 +126,8 @@
             background-color: rgb(15, 15, 15);
             border-radius: 25px;
             border: 1px solid white;
+            overflow-y: scroll;
+            max-height: 100%;
             button {
                 border-radius: 100%;
                 margin-left: 12px;
@@ -141,7 +146,7 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                overflow: scroll;
+                
                 h1 {
                     padding: 0;
                     margin: 0;
@@ -152,12 +157,36 @@
                 }
                 div {
                     margin: 24px;
-                    
                 }
                 .mini {
                         color: rgb(150, 150, 150);
                         font-size: 12px;
                         margin-bottom: 24px;
+                }
+                .infoStatsBar {
+                    display: block;
+                    border-radius: 5px;
+                    background-color: #D97706;
+                    width: 65%;
+                    height: 10px;
+                    padding: 0;
+                    .killCounts {
+                        margin: 0;
+                        padding: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-direction: row;
+                    }
+                }
+                .infoStatsBarYou {
+                    display: block;
+                    border-radius: 5px;
+                    background-color: #818CF8;
+                    width: 50%;
+                    height: 10px;
+                    margin: 0;
+                    
                 }
             }
             
@@ -199,6 +228,7 @@
         const tabs = [["your", "sgl"], ["warriors", "nonSafe", "safe"]];
         let firstLoad = true;
         let warriorLevels = [];
+        let attackableLevels = [];
         function changeTab(bar_id, tab_id, style) {
             for (const tab of tabs[bar_id]) {
                 if (tab == tab_id) { document.getElementById(tab).style.display = style; }
@@ -208,7 +238,7 @@
 
         function setKey() {
                 apikey = prompt('Enter your api key to continue')
-                document.cookie=`api_key=${apikey}`
+                document.cookie=`api_key=${apikey};`
         }
         
         async function getOwnGuildInformation() {
@@ -223,6 +253,7 @@
                 document.getElementById("nonSafe").innerHTML = '';
                 document.getElementById("safe").innerHTML = '';
                 warriorLevels = [];
+                attackableLevels = [];
             }
             
             
@@ -254,8 +285,10 @@
                 if (member.warrior === 1) {
                     ml = document.getElementById("warriors");
                     warriorLevels.push(member.level);
+                    attackableLevels.push(member.level);
                 } else if (member.safe_mode === 0) {
                     ml = document.getElementById("nonSafe");
+                    attackableLevels.push(member.level);
                 } else {
                     ml = document.getElementById("safe")
                 }
@@ -264,6 +297,7 @@
             warriorLevels.sort((a, b) => {
                 return a - b;
             });
+            changeTab(0, 'your', 'block');
         }
         
         async function getSGL() {
@@ -300,6 +334,7 @@
                 r = r.replace('%gid', rank.guild.id);
                 document.getElementById("sglFetched").innerHTML += r;
             }
+            changeTab(0, "sgl", 'block');
         }
         
         async function inspect(guild_id) {
@@ -328,40 +363,49 @@
             } else {
                 document.getElementById("infoStats").style.display = "flex";
                 document.getElementById("infoWin").style.display = "block";
+                let warriors = 0;
+                let warrior_ls = [];
+                let attackable = 0;
+                let attackable_ls = [];
+                for (let member of members) {
+                    if (member.warrior === 1) {
+                        warriors++;
+                        warrior_ls.push(member.level);
+                    }
+                    if (member.safe_mode === 0) {
+                        attackable++;
+                        attackable_ls.push(member.level);
+                    }
+                }
+                warrior_ls.sort((a, b) => {
+                    return a - b;
+                });
+                const probs = calculateProbability(warrior_ls, attackable_ls)
+                document.getElementById("infoWarriors").textContent = `Warriors: ${warriors}`;
+                document.getElementById("infoTargets").textContent = `Attackable players: ${attackable}`;
+                document.getElementById("infoProb").textContent = `War Win Chance: ${probs[0]}%`;
+                document.getElementById("infoTheirKills").textContent = `${probs[1]} kills`;
+                document.getElementById("infoYourKills").textContent = `${probs[2]} kills`;
+                document.getElementById("infoRatio").style.width = `${probs[0]}%`
             }
 
             document.getElementById("infoType").textContent = `Type: ${type}`;
 
-            let warriors = 0;
-            let warrior_ls = [];
-            for (let member of members) {
-                if (member.warrior === 1) {
-                    warriors++;
-                    warrior_ls.push(member.level);
-                }
-            }
-            warrior_ls.sort((a, b) => {
-                return a - b;
-            });
-            const probs = calculateProbability(warrior_ls)
-            document.getElementById("infoWarriors").textContent = `Warriors: ${warriors}`;
-            document.getElementById("infoProb").textContent = `War Win Chance: ${probs[0]}%`;
-            document.getElementById("infoTheirKills").textContent = `Their Daily Kills: ${probs[1]}*`;
-            document.getElementById("infoYourKills").textContent = `Your Daily Kills: ${probs[2]}*`;
+            
         }
 
-        function calculateProbability(guild_levels) {
+        function calculateProbability(w_levels, a_levels) {
             // [win chance %, their kills, your kills]
             let values = [50, 0, 0];
-            for (let warrior of guild_levels) {
-                for (let target of warriorLevels) {
+            for (let warrior of w_levels) {
+                for (let target of attackableLevels) {
                     if (warrior > target+100) {
                         values[1]+=4;
                     }
                 }
             }
             for (let warrior of warriorLevels) {
-                for (let target of guild_levels) {
+                for (let target of a_levels) {
                     if (warrior > target+100) {
                         values[2]+=4;
                     }
@@ -376,36 +420,35 @@
             document.getElementById("guildInfo").style.display = "none";
         }
 
-        async function begin() {
+        window.onload = async function begin() {
             apikey=getCookie('api_key');
             if (!apikey) {
                 await setKey();
             }
             await getOwnGuildInformation();
-            await getSGL();
             firstLoad = false;
         }
-
-        begin();
 
     </script>
     <p id="limit" style="display: none;">TODO: get and display rate limit information</p>
     <header>
         <p>SMMO Guild Tools / War Calculator</p>
+        <p>Be careful of rate limits.</p>
         <button id="api" onclick="setKey()">Update API Key</button>
-        <button id="guild" onclick="getOwnGuildInformation()">Update Guild</button>
-        <button id="list" onclick="getSGL()">Update SGL</button>
+        <a id="changelog" href="changelog" style="display: none;">Changelog</a>
+        
     </header>
     
     <br>
     <br> 
     <div class="tabBar">
-        <button onclick="changeTab(0, 'your', 'block')">Guild</button>
-        <button onclick="changeTab(0, 'sgl', 'block')">SGL</button>
+        <button onclick="getOwnGuildInformation()">Guild</button>
+        <button onclick="getSGL()">SGL</button>
     </div>
     <div id="your">
         <p id="guildNotFetched">
-            You have not fetched guild information yet, so nothing can be displayed. Click "get current guild information" to load.
+            Fetching guild information... please wait.<br>
+            If information does not load, your api key may be invalid or you are being ratelimited.
         </p>
         <div id="guildFetched" style="display: none;">
             
@@ -435,7 +478,8 @@
     </div>
     <div id="sgl" style="display: none;">
         <p id="sglNotFetched">
-            You have not fetched the current Seasonal Guild Leaderboard yet. Click "get sgl" to load.
+            Fetching SGL information... please wait.<br>
+            If information does not load, your api key may be invalid or you are being ratelimited.
         </p>
         <div id="sglFetched" style="display: none;"></div>
     </div>
@@ -446,12 +490,26 @@
             <p id="infoExp">? EXP</p>
             <p id="infoWin" class="mini">+ ? exp on war win.</p>
             <p id="infoType">Type: PvP and PvE</p>
-            <p id="infoWarriors">Warriors: ?</p>
+            
             <div id="infoStats">
+                <p id="infoWarriors">Warriors: ?</p>
+                <p id="infoTargets">Attackable players: ?</p>
                 <p id="infoProb">War win Chance: ?%</p>
-                <p id="infoTheirKills">Their daily kills: ?*</p>
-                <p id="infoYourKills">Your daily kills: ?*</p>
-                <p class="mini">* Numbers are likely overestimated and actual kill count will vary. Numbers assume no non-warrior targets.</p>
+                <p>Maximum Daily Kill Count (you/them):</p>
+                <div class="infoStatsBar">
+                    <div class="infoStatsBarYou" id="infoRatio">
+                    </div>
+                    <div class="killCounts">
+                        <p id="infoYourKills">killcount them</p>
+                        <p id="infoTheirKills">killcount us</p>
+                    </div>
+                    <p class="mini">
+                        Kill counts show the absolute maximum kills possible (4x every day) without special attack, assuming players attack targets at most 100 levels above their own.
+                        They include non-warrior targets in both guilds, assuming they do not get kills.
+                        Actual kill count will vary.
+                    </p>
+                </div>
+                
 
             </div>
         </div>
