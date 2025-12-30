@@ -3,22 +3,35 @@
     <title>SMMO Guild Tools</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
+        img {
+            image-rendering: pixelated;
+        }
         body {
             color: white;
             background-color: rgb(10, 10, 10);
             font-family: Verdana, Geneva, Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
         }
         header {
-            background-color: rgb(10, 10, 10);
+            background-color: rgb(25, 25, 25);
             border-bottom: 1px solid white;
             display: flex;
             flex-direction: row;
             align-items: center;
-            p {
-                padding-right: 48px;
+            justify-content: space-around;
+            padding: 0;
+            padding-left: 12px;
+            padding-right: 12px;
+            div {
+                width: 33vw;
+                max-width: 33vw;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             a, button {
-                background-color: rgb(10, 10, 10);
+                background-color: rgb(25, 25, 25);
                 color: white;
                 transition-duration: 100ms;
                 border: none;
@@ -29,7 +42,7 @@
                 font-size: 12px;
             }
             a:hover, button:hover {
-                background-color: rgb(25, 25, 25);
+                background-color: rgb(10, 10, 10);
                 transition-duration: 100ms;
                 
             }
@@ -38,14 +51,18 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            border-bottom: 4px solid white;
+            border-bottom: none;
+            justify-content: center;
             button {
                 background-color: rgb(10, 10, 10);
                 color: white;
                 transition-duration: 100ms;
-                border: 1px solid white;
-                padding: 8px;
-                margin: 0;
+                border: 1px solid gray;
+                border-bottom: 2px solid gray;
+                border-radius: 5px;
+                width: 100px;
+                height: 40px;
+                margin: 4px;
                 cursor: pointer;
             }
             button:hover {
@@ -53,11 +70,20 @@
                 background-color: rgb(25, 25, 25);
             }
         }
+        .memberList {
+            background-color: rgb(25, 25, 25);
+            border: 1px solid white;
+            border-radius: 25px;
+            width: 50vw;
+            margin-left: 25vw;
+        }
         .member {
             display: flex;
             flex-direction: column;
             justify-content: center;
             margin: 8px;
+            padding: 8px;
+            border-radius: 10px;
             .one {
                 display: flex;
                 flex-direction: row;
@@ -67,12 +93,12 @@
                 p {
                     padding: 0;
                     margin: 0;
-                    font-size: 24px;
+                    font-size: 20px;
                 }
                 .level {
                     color: gray;
                     margin-left: 12px;
-                    font-size: 16px;
+                    font-size: 14px;
                 }
             }
             .pid {
@@ -86,8 +112,15 @@
             display: flex;
             flex-direction: row;
             margin: 8px;
+            padding: 4px;
             p {
                 margin: 12px;
+                min-width: 24px;
+            }
+            img {
+                width: 48px;
+                height: 48px;
+                margin-right: 8px;
             }
             .one {
                 display: flex;
@@ -105,16 +138,26 @@
                     vertical-align: sub;
                 }
             }
-            button {
+            a, button {
                 background-color: rgb(10, 10, 10);
                 border: 1px solid white;
                 color: white;
                 cursor: pointer;
-
+                text-decoration: none;
+                font-size: 12px;
+                align-self: center;
+                padding: 12px;
+                height: 40px;
+                max-height: 40px;
             }
-            button:hover {
+            a {
+                height: 14px;
+                max-height: 14px;
+            }
+            a:hover, button:hover {
                 transition-duration: 100ms;
                 background-color: rgb(25, 25, 25);
+                
             }
         }
         #guildInfo {
@@ -141,7 +184,13 @@
                 border: 1px solid gray;
                 cursor: pointer;
             }
-            div {
+            .b {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+            }
+            .a {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -154,9 +203,6 @@
                 p {
                     padding: 4px;
                     margin: 0;
-                }
-                div {
-                    margin: 24px;
                 }
                 .mini {
                         color: rgb(150, 150, 150);
@@ -189,7 +235,19 @@
                     
                 }
             }
-            
+            .m24 {
+                margin: 24px;
+            }
+            .mx24 {
+                margin-left: 24px;
+                margin-right: 24px;
+            }
+            .bg {
+                background-color: rgb(25, 25, 25);
+                border-radius: 10px;
+                padding: 4px;
+                width: 200px;
+            }
 
         }
     </style>
@@ -249,9 +307,9 @@
                 })
             };
             if (!firstLoad) {
-                document.getElementById("warriors").innerHTML = '';
-                document.getElementById("nonSafe").innerHTML = '';
-                document.getElementById("safe").innerHTML = '';
+                document.getElementById("warriors").innerHTML = '<h2 style="width: 100%; text-align: center;">Warriors</h2>';
+                document.getElementById("nonSafe").innerHTML = '<h2 style="width: 100%; text-align: center;">Non-Warrior PvP Members</h2>';
+                document.getElementById("safe").innerHTML = '<h2 style="width: 100%; text-align: center;">PvE Members</h2>';
                 warriorLevels = [];
                 attackableLevels = [];
             }
@@ -268,30 +326,48 @@
             document.getElementById('guildNotFetched').style.display = 'none';
             document.getElementById('guildFetched').style.display = 'block';
             document.getElementById('name').innerText = me.guild.name;
+            guild.sort((a, b) => {
+                return b.level - a.level;
+            });
             const memberTemplate = `
-                <div class=member>
+                <div class=member style="background-color: rgb(%bg)">
                     <div class=one>
                         <p>%name</p>
-                        <p class="level">Level %level</p>
+                        <p class="level">Level <b>%level</b></p>
                     </div>
                     <p class=pid>@%id</p>
                 </div>
             `;
+            let mns = [0, 0, 0]
             for (let member of guild) {
                 let mem = memberTemplate.replace('%name', member.name);
-                mem = mem.replace("%level", member.level);
+                mem = mem.replace("%level", member.level.toLocaleString());
                 mem = mem.replace("%id", member.user_id);
                 let ml;
+                let bg = "10, 10, 10";
                 if (member.warrior === 1) {
                     ml = document.getElementById("warriors");
+                    mns[0]++;
+                    if (mns[0] % 2 == 0) {
+                        bg = "25, 25, 25";
+                    }
                     warriorLevels.push(member.level);
                     attackableLevels.push(member.level);
                 } else if (member.safe_mode === 0) {
                     ml = document.getElementById("nonSafe");
+                    mns[1]++;
+                    if (mns[1] % 2 == 0) {
+                        bg = "25, 25, 25";
+                    }
                     attackableLevels.push(member.level);
                 } else {
                     ml = document.getElementById("safe")
+                    mns[2]++;
+                    if (mns[2] % 2 == 0) {
+                        bg = "25, 25, 25";
+                    }
                 }
+                mem = mem.replace("%bg", bg);
                 ml.innerHTML += mem
             }
             warriorLevels.sort((a, b) => {
@@ -314,24 +390,36 @@
             const sglFetch = await fetch(`https://api.simple-mmo.com/v1/guilds/seasons/${season}`, params);
             const sgl = await sglFetch.json();
             const rankTemplate = `
-                <div class="sglRank">
-                    <p>%rank.</p>
-                    <div class="one">
-                        <p>%name</p>
-                        <p class="gexp">%exp EXP</p>
+                <div class="sglRank" style="justify-content: space-between; %bg">
+                    <div class="sglRank">
+                        <p>%rank.</p>
+                        <img src="https://web.simple-mmo.com%img">
+                        <div class="one">
+                            <p>%name</p>
+                            <p class="gexp"><b>%exp</b> EXP</p>
+                        </div>
                     </div>
-                    <p>+ %gains exp on war win.</p>
-                    <button onclick="inspect(%gid)">Inspect</button>
+                    <div class="sglRank">
+                        <p>+ <b>%gains</b> exp on war win</p>
+                        <button onclick="inspect(%gid)">Inspect</button>
+                        <a href="https://web.simple-mmo.com/guilds/view/%gid?new_page=true" target="_blank">View Guild Page</a>
+                    </div>
                 </div>
             `;
             document.getElementById('sglNotFetched').style.display = 'none';
             document.getElementById('sglFetched').style.display = 'block';
             for (let rank of sgl) {
                 let r = rankTemplate.replace('%rank', rank.position);
+                let bg = "background-color: rgb(10, 10, 10);"
+                if (rank.position % 2 === 1) bg = "background-color: rgb(25, 25, 25);"
+                r = r.replace('%bg', bg);
+                r = r.replace('%img', rank.guild.icon);
                 r = r.replace('%name', rank.guild.name);
-                r = r.replace('%exp', rank.experience);
-                r = r.replace('%gains', Math.max(120000, Math.round(rank.experience*0.02)));
-                r = r.replace('%gid', rank.guild.id);
+                r = r.replace('%exp', rank.experience.toLocaleString());
+                r = r.replace('%gains', Math.max(120000, Math.round(rank.experience*0.02)).toLocaleString());
+                console.log(r);
+                r = r.replaceAll('%gid', rank.guild.id);
+                console.log(r);
                 document.getElementById("sglFetched").innerHTML += r;
             }
             changeTab(0, "sgl", 'block');
@@ -346,23 +434,22 @@
             };
             const infoFetch = await fetch(`https://api.simple-mmo.com/v1/guilds/info/${guild_id}`, params);
             const info = await infoFetch.json();
-            console.log(info);
-            const memberFetch = await fetch(`https://api.simple-mmo.com/v1/guilds/members/${guild_id}`, params);
-            const members = await memberFetch.json();
-            console.log("Members of "+info.name+":");
-            console.log(members);
-            document.getElementById("guildInfo").style.display = "block";
+            
+            
             document.getElementById("infoName").textContent = `[${info.tag}] ${info.name}`;
-            document.getElementById("infoExp").textContent = `${info.current_season_exp} EXP`;
-            document.getElementById("infoWin").textContent = `+${Math.max(120000, Math.round(info.current_season_exp*0.02))} exp on war win`;
-            let type = 'PvP and PvE';
+            document.getElementById("infoExp").textContent = info.current_season_exp.toLocaleString();
+            
+            let type = 'PvP';
             if (info.passive === 1) {
                 type = 'PvE';
                 document.getElementById("infoStats").style.display = "none";
-                document.getElementById("infoWin").style.display = "none";
+                document.getElementById("infoWinP").style.display = "none";
             } else {
+                const memberFetch = await fetch(`https://api.simple-mmo.com/v1/guilds/members/${guild_id}`, params);
+                const members = await memberFetch.json();
                 document.getElementById("infoStats").style.display = "flex";
-                document.getElementById("infoWin").style.display = "block";
+                document.getElementById("infoWinP").style.display = "block";
+                document.getElementById("infoWin").textContent = Math.max(120000, Math.round(info.current_season_exp*0.02)).toLocaleString();
                 let warriors = 0;
                 let warrior_ls = [];
                 let attackable = 0;
@@ -381,17 +468,17 @@
                     return a - b;
                 });
                 const probs = calculateProbability(warrior_ls, attackable_ls)
-                document.getElementById("infoWarriors").textContent = `Warriors: ${warriors}`;
-                document.getElementById("infoTargets").textContent = `Attackable players: ${attackable}`;
-                document.getElementById("infoProb").textContent = `War Win Chance: ${probs[0]}%`;
-                document.getElementById("infoTheirKills").textContent = `${probs[1]} kills`;
-                document.getElementById("infoYourKills").textContent = `${probs[2]} kills`;
+                document.getElementById("infoWarriors").textContent = warriors;
+                document.getElementById("infoTargets").textContent = attackable;
+                document.getElementById("infoProb").textContent = `${probs[0]}%`;
+                document.getElementById("infoTheirKills").textContent = probs[1].toLocaleString();
+                document.getElementById("infoYourKills").textContent = probs[2].toLocaleString();
                 document.getElementById("infoRatio").style.width = `${probs[0]}%`
             }
 
-            document.getElementById("infoType").textContent = `Type: ${type}`;
+            document.getElementById("infoType").textContent = type;
 
-            
+            document.getElementById("guildInfo").style.display = "block";
         }
 
         function calculateProbability(w_levels, a_levels) {
@@ -432,9 +519,18 @@
     </script>
     <p id="limit" style="display: none;">TODO: get and display rate limit information</p>
     <header>
-        <p>SMMO Guild Tools / War Calculator</p>
-        <p>Be careful of rate limits.</p>
-        <button id="api" onclick="setKey()">Update API Key</button>
+        <div>
+            <p>Be careful of rate limits</p>
+        </div>
+        <div>
+            <p><b>SMMO Guild Tools / War Calculator</b></p>
+        </div>
+        <div>
+            <button id="api" onclick="setKey()">Update API Key</button>
+        </div>
+        
+        
+        
         <a id="changelog" href="changelog" style="display: none;">Changelog</a>
         
     </header>
@@ -445,38 +541,38 @@
         <button onclick="getOwnGuildInformation()">Guild</button>
         <button onclick="getSGL()">SGL</button>
     </div>
-    <div id="your">
+    <div id="your" style="min-height: 90vh;">
         <p id="guildNotFetched">
             Fetching guild information... please wait.<br>
             If information does not load, your api key may be invalid or you are being ratelimited.
         </p>
         <div id="guildFetched" style="display: none;">
             
-            <h1 id="name">
+            <h1 id="name" style="width: 100%; text-align: center;">
                 guild name
             </h1>
             
             <div id="memberList">
                 <div class="tabBar">
                     <button onclick="changeTab(1, 'warriors', 'block')">Warriors</button>
-                    <button onclick="changeTab(1, 'nonSafe', 'block')">Non-Warrior</button>
+                    <button onclick="changeTab(1, 'nonSafe', 'block')">Non-Warriors</button>
                     <button onclick="changeTab(1, 'safe', 'block')">PvE</button>
 
                 </div>
-                <div id="warriors">
-                    <h2>Warriors</h2>
+                <div id="warriors" class="memberList">
+                    <h2 style="width: 100%; text-align: center;">Warriors</h2>
                 </div>
-                <div id="nonSafe" style="display: none;">
-                    <h2>Members - Not Warrior, Not Safe Mode</h2>
+                <div id="nonSafe" class="memberList" style="display: none;">
+                    <h2 style="width: 100%; text-align: center;">Non-Warrior PvP Members</h2>
                 </div>
-                <div id="safe" style="display: none;">
-                    <h2>Other members (PvE)</h2>
+                <div id="safe" class="memberList" style="display: none;">
+                    <h2 style="width: 100%; text-align: center;">PvE Members</h2>
                 </div>
             </div>
         </div>
         
     </div>
-    <div id="sgl" style="display: none;">
+    <div id="sgl" style="min-height: 90vh; display: none;">
         <p id="sglNotFetched">
             Fetching SGL information... please wait.<br>
             If information does not load, your api key may be invalid or you are being ratelimited.
@@ -485,27 +581,41 @@
     </div>
     <div id="guildInfo" style="display: none;">
         <button onclick="closeInfo()">X</button>
-        <div>
+        <div class="a">
             <h1 id="infoName">name</h1>
-            <p id="infoExp">? EXP</p>
-            <p id="infoWin" class="mini">+ ? exp on war win.</p>
-            <p id="infoType">Type: PvP and PvE</p>
+            <p><b id="infoExp">?</b> EXP</p>
+            <p id="infoWinP" class="mini">+ <b id="infoWin">?</b> exp on war win</p>
+            <p>Type: <b id="infoType">PvP</b></p>
             
-            <div id="infoStats">
-                <p id="infoWarriors">Warriors: ?</p>
-                <p id="infoTargets">Attackable players: ?</p>
-                <p id="infoProb">War win Chance: ?%</p>
+            <div id="infoStats" class="a m24">
+                <div class="b">
+                    <div class="a m24 bg">
+                        <div class="b">
+                            <img src="https://web.simple-mmo.com/img/icons/S_Sword09.png"><p>Warriors</p>
+                        </div>
+                        <p><b id="infoWarriors">?</b></p>
+                    </div>
+                    <div class="a m24 bg">
+                        <div class="b">
+                            <img src="https://web.simple-mmo.com/img/icons/S_Sword01.png"><p>Attackable Players</p>
+                        </div>
+                        <p><b id="infoTargets">?</b></p>
+                    </div>
+                </div>
+                
+                
+                <p>War Win Chance: <b id="infoProb">?%</b></p>
                 <p>Maximum Daily Kill Count (you/them):</p>
                 <div class="infoStatsBar">
                     <div class="infoStatsBarYou" id="infoRatio">
                     </div>
                     <div class="killCounts">
-                        <p id="infoYourKills">killcount them</p>
-                        <p id="infoTheirKills">killcount us</p>
+                        <p><b id="infoYourKills">0</b> kills</p>
+                        <p><b id="infoTheirKills">0</b> kills</p>
                     </div>
-                    <p class="mini">
+                    <p class="mini" style="text-align: justify;">
                         Kill counts show the absolute maximum kills possible (4x every day) without special attack, assuming players attack targets at most 100 levels above their own.
-                        They include non-warrior targets in both guilds, assuming they do not get kills.
+                        They include non-warrior targets in both guilds, assuming they do not contribute to the war.
                         Actual kill count will vary.
                     </p>
                 </div>
@@ -514,4 +624,7 @@
             </div>
         </div>
     </div>
+    <footer>
+        <p style="font-size: 12px; width: 100%; text-align: center;">All images on this site are sourced directly from SimpleMMO.</p>
+    </footer>
 </body>
