@@ -23,6 +23,7 @@
             padding: 0;
             padding-left: 12px;
             padding-right: 12px;
+            
             div {
                 width: 33vw;
                 max-width: 33vw;
@@ -70,49 +71,94 @@
                 background-color: rgb(25, 25, 25);
             }
         }
+        #memberList {
+            margin-left: 25vw;
+            display: flex;
+            flex-direction: row;
+        }
         .memberList {
             background-color: rgb(25, 25, 25);
             border: 1px solid white;
             border-radius: 25px;
             width: 50vw;
-            margin-left: 25vw;
+            
+        }
+        .memberOptions {
+            display: flex;
+            flex-direction: column;
+            div {
+                display: flex;
+                flex-direction: row;
+            }
+            button, select {
+                background-color: rgb(10, 10, 10);
+                color: white;
+                transition-duration: 100ms;
+                border: 1px solid gray;
+                border-bottom: 2px solid gray;
+                border-radius: 5px;
+                width: 100px;
+                height: 40px;
+                margin: 4px;
+                cursor: pointer;
+            }
+            .full {
+                width: calc(100% - 8px);
+            }
+            button:hover, select:hover, select:open {
+                transition-duration: 100ms;
+                background-color: rgb(25, 25, 25);
+            }
         }
         .member {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
             margin: 8px;
             padding: 8px;
             border-radius: 10px;
-            .one {
+            .memberInfo {
                 display: flex;
-                flex-direction: row;
-                margin: 0;
-                padding: 0;
-                align-items: end;
-                p {
+                flex-direction: column;
+                .one {
+                    display: flex;
+                    flex-direction: row;
+                    margin: 0;
+                    padding: 0;
+                    align-items: end;
+                    p {
+                        padding: 0;
+                        margin: 0;
+                        font-size: 20px;
+                    }
+                    .level {
+                        color: gray;
+                        margin-left: 12px;
+                        font-size: 14px;
+                    }
+                }
+                .pid {
+                    color: gray;
                     padding: 0;
                     margin: 0;
-                    font-size: 20px;
+                    font-size: 12px;
                 }
-                .level {
-                    color: gray;
-                    margin-left: 12px;
-                    font-size: 14px;
-                }
+                
             }
-            .pid {
-                color: gray;
-                padding: 0;
+            .label {
                 margin: 0;
-                font-size: 12px;
+                font-size: 14px;
             }
+            
         }
         .sglRank {
             display: flex;
             flex-direction: row;
             margin: 8px;
             padding: 4px;
+            max-width: 100vw;
+            overflow: hidden;
             p {
                 margin: 12px;
                 min-width: 24px;
@@ -204,11 +250,7 @@
                     padding: 4px;
                     margin: 0;
                 }
-                .mini {
-                        color: rgb(150, 150, 150);
-                        font-size: 12px;
-                        margin-bottom: 24px;
-                }
+                
                 .infoStatsBar {
                     display: block;
                     border-radius: 5px;
@@ -250,6 +292,11 @@
             }
 
         }
+        .mini {
+            color: rgb(150, 150, 150);
+            font-size: 12px;
+            margin-bottom: 24px !important;
+        }
     </style>
     <script>
         let apikey;
@@ -283,10 +330,12 @@
 </head>
 <body>
     <script>
-        const tabs = [["your", "sgl"], ["warriors", "nonSafe", "safe"]];
+        const tabs = [["your", "sgl"], ["all", "warriors", "nonSafe", "safe"]];
         let firstLoad = true;
         let warriorLevels = [];
         let attackableLevels = [];
+        let guildGrads = {};
+        let memberList = [];
         function changeTab(bar_id, tab_id, style) {
             for (const tab of tabs[bar_id]) {
                 if (tab == tab_id) { document.getElementById(tab).style.display = style; }
@@ -306,13 +355,7 @@
                     api_key: apikey
                 })
             };
-            if (!firstLoad) {
-                document.getElementById("warriors").innerHTML = '<h2 style="width: 100%; text-align: center;">Warriors</h2>';
-                document.getElementById("nonSafe").innerHTML = '<h2 style="width: 100%; text-align: center;">Non-Warrior PvP Members</h2>';
-                document.getElementById("safe").innerHTML = '<h2 style="width: 100%; text-align: center;">PvE Members</h2>';
-                warriorLevels = [];
-                attackableLevels = [];
-            }
+            
             
             
             let meFetch = await fetch('https://api.simple-mmo.com/v1/player/me', params);
@@ -326,56 +369,227 @@
             document.getElementById('guildNotFetched').style.display = 'none';
             document.getElementById('guildFetched').style.display = 'block';
             document.getElementById('name').innerText = me.guild.name;
-            guild.sort((a, b) => {
-                return b.level - a.level;
+            if (guildGrads[me.guild.id.toString()]) {
+                document.getElementById('name').style.background = `-webkit-linear-gradient(${guildGrads[me.guild.id.toString()]})`;
+                document.getElementById('name').style.backgroundClip = `text`;
+                document.getElementById('name').style.color = `transparent`;
+            }
+            memberList = guild;
+            if (!localStorage.getItem('memberList')) {
+                localStorage.setItem('memberList', JSON.stringify(memberList));
+            }
+            let storedList = await JSON.parse(localStorage.getItem('memberList'));
+            for (let member of guild) {
+                if (!storedList.find((element) => {
+                    return (element.user_id === member.user_id);
+                })) {
+                    storedList.push(member);
+                }
+                 if (member.safe_mode === 0) {
+                    attackableLevels.push(member.level);
+                    if (member.warrior === 1) {
+                        warriorLevels.push(member.level);
+                    }
+                }
+            }
+            localStorage.setItem('memberList', JSON.stringify(storedList));
+            warriorLevels.sort((a, b) => {
+                return a - b;
             });
+            loadGuildMemberList(document.getElementById("memberOptions").value, document.getElementById("memberOptionsMode").value);
+            changeTab(0, 'your', 'block');
+        }
+        
+        async function loadGuildMemberList(sortMethod, timeRange) {
+            if (!firstLoad) {
+                document.getElementById("all").innerHTML = '<h2 style="width: 100%; text-align: center;">All Members</h2>'
+                document.getElementById("warriors").innerHTML = '<h2 style="width: 100%; text-align: center;">Warriors</h2>';
+                document.getElementById("nonSafe").innerHTML = '<h2 style="width: 100%; text-align: center;">Non-Warrior PvP Members</h2>';
+                document.getElementById("safe").innerHTML = '<h2 style="width: 100%; text-align: center;">PvE Members</h2>';
+            }
+            const storedList = await JSON.parse(localStorage.getItem('memberList'));
+            switch (sortMethod) {
+                case "level":
+                    if (timeRange == "alltime") {
+                        memberList = memberList.sort((a, b) => {
+                            return b.level - a.level;
+                        });
+                    } else {
+                        memberList = memberList.sort((a, b) => {
+                            let storedA = storedList.find((element) => {
+                                return a.user_id == element.user_id;
+                            });
+                            let storedB = storedList.find((element) => {
+                                return b.user_id == element.user_id;
+                            });
+                            return (b.level - storedB.level) - (a.level - storedA.level);
+                        });
+                    }
+                    break;
+                case "pvp":
+                    if (timeRange == "alltime") {
+                        memberList = memberList.sort((a, b) => {
+                            return b.user_kills - a.user_kills;
+                        });
+                    } else {
+                        memberList = memberList.sort((a, b) => {
+                            let storedA = storedList.find((element) => {
+                                return a.user_id == element.user_id;
+                            });
+                            let storedB = storedList.find((element) => {
+                                return b.user_id == element.user_id;
+                            });
+                            return (b.user_kills - storedB.user_kills) - (a.user_kills - storedA.user_kills);
+                        });
+                    }
+                    break;
+                case "pve":
+                    if (timeRange == "alltime") {
+                        memberList = memberList.sort((a, b) => {
+                            return b.npc_kills - a.npc_kills;
+                        });
+                    } else {
+                        memberList = memberList.sort((a, b) => {
+                            let storedA = storedList.find((element) => {
+                                return a.user_id == element.user_id;
+                            });
+                            let storedB = storedList.find((element) => {
+                                return b.user_id == element.user_id;
+                            });
+                            return (b.npc_kills - storedB.npc_kills) - (a.npc_kills - storedA.npc_kills);
+                        });
+                    }
+                    break;
+                case "steps":
+                    if (timeRange == "alltime") {
+                        memberList = memberList.sort((a, b) => {
+                            return b.steps - a.steps;
+                        });
+                    } else {
+                        memberList = memberList.sort((a, b) => {
+                            let storedA = storedList.find((element) => {
+                                return a.user_id == element.user_id;
+                            });
+                            let storedB = storedList.find((element) => {
+                                return b.user_id == element.user_id;
+                            });
+                            return (b.steps - storedB.steps) - (a.steps - storedA.steps);
+                        });
+                    }
+            }
             const memberTemplate = `
-                <div class=member style="background-color: rgb(%bg)">
-                    <div class=one>
-                        <p>%name</p>
-                        <p class="level">Level <b>%level</b></p>
+                <div class="member" style="background-color: rgb(%bg)">
+                    <div class="memberInfo">
+                        <div class="one">
+                            <p>%name</p>
+                            <p class="level">Level <b>%level</b></p>
+                        </div>
+                        <p class="pid">@%id</p>
                     </div>
-                    <p class=pid>@%id</p>
+                    <p class="label">%label</p>
                 </div>
             `;
-            let mns = [0, 0, 0]
-            for (let member of guild) {
+            let mn = 0;
+            let mns = [0, 0, 0];
+            for (let member of memberList) {
                 let mem = memberTemplate.replace('%name', member.name);
                 mem = mem.replace("%level", member.level.toLocaleString());
                 mem = mem.replace("%id", member.user_id);
+                /*Add Label*/ switch (sortMethod) {
+                    case "level":
+                        if (timeRange == "alltime") {
+                            mem = mem.replace("%label", ``);
+                        } else {
+                            let stored = storedList.find((element) => {
+                                return member.user_id == element.user_id;
+                            });
+                            let diff = member.level - stored.level;
+                            mem = mem.replace("%label", `${diff.toLocaleString()} levels`);
+                        }
+                        break;
+                    case "pvp":
+                        if (timeRange == "alltime") {
+                            mem = mem.replace("%label", `${member.user_kills.toLocaleString()} player kills`);
+                        } else {
+                            let stored = storedList.find((element) => {
+                                return member.user_id == element.user_id;
+                            });
+                            let diff = member.user_kills - stored.user_kills;
+                            mem = mem.replace("%label", `${diff.toLocaleString()} player kills`);
+                        }
+                        break;
+                    case "pve":
+                        if (timeRange == "alltime") {
+                            mem = mem.replace("%label", `${member.npc_kills.toLocaleString()} NPC kills`);
+                        } else {
+                            let stored = storedList.find((element) => {
+                                return member.user_id == element.user_id;
+                            });
+                            let diff = member.npc_kills - stored.npc_kills;
+                            mem = mem.replace("%label", `${diff.toLocaleString()} NPC kills`);
+                        }
+                        break;
+                    case "steps":
+                        if (timeRange == "alltime") {
+                            mem = mem.replace("%label", `${member.steps.toLocaleString()} steps`);
+                        } else {
+                            let stored = storedList.find((element) => {
+                                return member.user_id == element.user_id;
+                            });
+                            let diff = member.steps - stored.steps;
+                            mem = mem.replace("%label", `${diff.toLocaleString()} steps`);
+                        }
+                }
                 let ml;
                 let bg = "10, 10, 10";
+                let bg2 = "10, 10, 10";
+                mn++;
+                if (mn % 2 == 0) {
+                    bg2 = "25, 25, 25";
+                }
+                document.getElementById("all").innerHTML += mem.replace("%bg", bg2);
                 if (member.warrior === 1) {
                     ml = document.getElementById("warriors");
                     mns[0]++;
                     if (mns[0] % 2 == 0) {
                         bg = "25, 25, 25";
                     }
-                    warriorLevels.push(member.level);
-                    attackableLevels.push(member.level);
                 } else if (member.safe_mode === 0) {
                     ml = document.getElementById("nonSafe");
                     mns[1]++;
                     if (mns[1] % 2 == 0) {
                         bg = "25, 25, 25";
                     }
-                    attackableLevels.push(member.level);
                 } else {
-                    ml = document.getElementById("safe")
+                    ml = document.getElementById("safe");
                     mns[2]++;
                     if (mns[2] % 2 == 0) {
                         bg = "25, 25, 25";
                     }
                 }
                 mem = mem.replace("%bg", bg);
-                ml.innerHTML += mem
+                ml.innerHTML += mem;
             }
-            warriorLevels.sort((a, b) => {
-                return a - b;
-            });
-            changeTab(0, 'your', 'block');
         }
-        
+
+        let confirmResetWeekly = false;
+        function resetWeekly() {
+            if (confirmResetWeekly) {
+                localStorage.setItem('memberList', JSON.stringify(memberList));
+                loadGuildMemberList(document.getElementById("memberOptions").value, document.getElementById("memberOptionsMode").value);
+                confirmResetWeekly = false;
+                document.getElementById("resetWeekly").textContent = "Trigger Weekly Reset";
+            } else {
+                document.getElementById("resetWeekly").textContent = "Click Again to Confirm";
+                confirmResetWeekly = true;
+                setTimeout(() => {
+                    confirmResetWeekly = false;
+                    document.getElementById("resetWeekly").textContent = "Trigger Weekly Reset";
+                }, 5000);
+            }
+            
+        }
+
         async function getSGL() {
             const season = 11;
             const params = {
@@ -395,7 +609,7 @@
                         <p>%rank.</p>
                         <img src="https://web.simple-mmo.com%img">
                         <div class="one">
-                            <p>%name</p>
+                            <p><span style="white-space: nowrap; %styleName">%name</span></p>
                             <p class="gexp"><b>%exp</b> EXP</p>
                         </div>
                     </div>
@@ -417,9 +631,10 @@
                 r = r.replace('%name', rank.guild.name);
                 r = r.replace('%exp', rank.experience.toLocaleString());
                 r = r.replace('%gains', Math.max(120000, Math.round(rank.experience*0.02)).toLocaleString());
-                console.log(r);
                 r = r.replaceAll('%gid', rank.guild.id);
-                console.log(r);
+                if (guildGrads[rank.guild.id.toString()]) 
+                    r = r.replace('%styleName', `background: -webkit-linear-gradient(${guildGrads[rank.guild.id.toString()]}); background-clip: text; color: transparent;`);
+                else r = r.replace('%styleName', "")
                 document.getElementById("sglFetched").innerHTML += r;
             }
             changeTab(0, "sgl", 'block');
@@ -507,23 +722,41 @@
             document.getElementById("guildInfo").style.display = "none";
         }
 
-        window.onload = async function begin() {
+        async function getGuildGradients() {
+            let gradFetch = await fetch("guildGradients.json");
+            guildGrads = await gradFetch.json();
+            
+        }
+
+        
+
+        window.onload = async function() {
             apikey=getCookie('api_key');
             if (!apikey) {
                 await setKey();
             }
+            await getGuildGradients();
             await getOwnGuildInformation();
+            document.getElementById("memberOptions").onchange = function(ev) {
+                const time = document.getElementById("memberOptionsMode").value;
+                loadGuildMemberList(ev.target.value, time);
+            }
+            document.getElementById("memberOptionsMode").onchange = function(ev) {
+                const option = document.getElementById("memberOptions").value;
+                loadGuildMemberList(option, ev.target.value);
+            }
             firstLoad = false;
         }
 
+
+
     </script>
-    <p id="limit" style="display: none;">TODO: get and display rate limit information</p>
     <header>
         <div>
             <p>Be careful of rate limits</p>
         </div>
         <div>
-            <p><b>SMMO Guild Tools / War Calculator</b></p>
+            <p><b>SMMO Guild Tools</b></p>
         </div>
         <div>
             <button id="api" onclick="setKey()">Update API Key</button>
@@ -534,9 +767,7 @@
         <a id="changelog" href="changelog" style="display: none;">Changelog</a>
         
     </header>
-    
     <br>
-    <br> 
     <div class="tabBar">
         <button onclick="getOwnGuildInformation()">Guild</button>
         <button onclick="getSGL()">SGL</button>
@@ -548,18 +779,21 @@
         </p>
         <div id="guildFetched" style="display: none;">
             
-            <h1 id="name" style="width: 100%; text-align: center;">
-                guild name
+            <h1 style="width: 100%; text-align: center;">
+                <span id="name" style="white-space: nowrap;">%name</span>
             </h1>
-            
-            <div id="memberList">
-                <div class="tabBar">
-                    <button onclick="changeTab(1, 'warriors', 'block')">Warriors</button>
-                    <button onclick="changeTab(1, 'nonSafe', 'block')">Non-Warriors</button>
-                    <button onclick="changeTab(1, 'safe', 'block')">PvE</button>
+            <div class="tabBar">
+                <button onclick="changeTab(1, 'all', 'block')">All</button>
+                <button onclick="changeTab(1, 'warriors', 'block')">Warriors</button>
+                <button onclick="changeTab(1, 'nonSafe', 'block')">Non-Warriors</button>
+                <button onclick="changeTab(1, 'safe', 'block')">PvE</button>
 
+            </div>
+            <div id="memberList">
+                <div id="all" class="memberList">
+                    <h2 style="width: 100%; text-align: center;">All Members</h2>
                 </div>
-                <div id="warriors" class="memberList">
+                <div id="warriors" class="memberList" style="display: none;">
                     <h2 style="width: 100%; text-align: center;">Warriors</h2>
                 </div>
                 <div id="nonSafe" class="memberList" style="display: none;">
@@ -567,6 +801,26 @@
                 </div>
                 <div id="safe" class="memberList" style="display: none;">
                     <h2 style="width: 100%; text-align: center;">PvE Members</h2>
+                </div>
+                <div class="memberOptions">
+                    <h3 style="width: 100%; text-align: center;">Sort Options</h3>
+                    <div>
+                        <select id="memberOptions" value="level">
+                            <option value="level">Level</option>
+                            <option value="pvp">Player Kills</option>
+                            <option value="pve">NPC Kills</option>
+                            <option value="steps">Steps</option>
+                        </select>
+                        <select id="memberOptionsMode">
+                            <option value="alltime">All Time</option>
+                            <option value="week">This Week</option>
+                        </select>
+                    </div>
+                    <h3 style="width: 100%; text-align: center;">Management</h3>
+                    <button id="resetWeekly" class="full" onclick="resetWeekly()">Trigger Weekly Reset</button>
+                    <p class="mini" style="text-align: justify; max-width: 200px; padding: 8px;">Weekly Reset will reset all the weekly gain stats immediately, so please make note of them before resetting!</p>
+                    <p class="mini" style="text-align: justify; max-width: 200px; padding: 8px;">The first weekly will start tracking the first time the page loads. It is recommended to wait until the next week before using this tool to track gains.</p>
+                    <p class="mini" style="text-align: justify; max-width: 200px; padding: 8px;">Likewise, new members will only start being tracked on weekly the first time they appear on this page. It is recommended to load this page whenever a new member you want to track joins the guild.</p>
                 </div>
             </div>
         </div>
