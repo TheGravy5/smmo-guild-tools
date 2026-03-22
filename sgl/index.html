@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<head>
+    <title>SMMO Guild Tools | Seasonal Guild Leaderboard</title>
+    <link rel="icon" type="image/x-icon" href="/smmo-guild-tools/favicon.ico">
+    <link rel="stylesheet" href="/smmo-guild-tools/style.css">
+    <meta name="viewport" content="width=device-width">
+    <meta name="application-name" content="SMMO Guild Tools">
+    <meta name="description" content="A collection of useful tools for staff of guilds in SimpleMMO, primarily PvP guilds.">
+    <meta name="keywords" content="simplemmo,guild tools,smmo,simplemmo tools">
+    <script src="/smmo-guild-tools/index.js"></script>
+    <script src="index.js"></script>
+
+</head>
+<body>
+    <header>
+        <div class="desktopOnlyFlex">
+            
+        </div>
+        <div>
+            <a href='/smmo-guild-tools'><p><b>SMMO Guild Tools</b></p></a>
+        </div>
+        <div>
+            <a id="changelog" href="changelog" style="display: none;">Changelog</a>
+        </div>
+    </header>
+    <div class="tabBar">
+        <a href="/smmo-guild-tools/guild">Guild</a>
+        <a href="/smmo-guild-tools/sgl">SGL</a>
+        <a href="/smmo-guild-tools/wars">Wars</a>
+        <a href="/smmo-guild-tools/settings">Settings</a>
+    </div>
+    <div id="content">
+        <div id="sgl">
+
+        </div>
+        <div id="guildInfo">
+            <button onclick="closeInfo()">X</button>
+            <div class="a">
+                <h1 id="infoName">name</h1>
+                <p><b id="infoExp">?</b> EXP</p>
+                <p id="infoWinP" class="mini">+ <b id="infoWin">?</b> exp on war win</p>
+                <p>Type: <b id="infoType">PvP</b></p>
+                
+                <div id="infoStats" class="a m24">
+                    <div class="b">
+                        <div class="a m24 bg">
+                            <div class="b">
+                                <img src="https://web.simple-mmo.com/img/icons/S_Sword09.png"><p class="shrinkMobile">Warriors</p>
+                            </div>
+                            <p><b id="infoWarriors">?</b></p>
+                        </div>
+                        <div class="a m24 bg">
+                            <div class="b">
+                                <img src="https://web.simple-mmo.com/img/icons/S_Sword01.png"><p class="shrinkMobile">Attackable Players</p>
+                            </div>
+                            <p><b id="infoTargets">?</b></p>
+                        </div>
+                    </div>
+                    
+                    
+                    <p>War Win Chance: <b id="infoProb">?%</b></p>
+                    <p>Total Targets</p>
+                    <div class="infoStatsBar">
+                        <div class="infoStatsBarYou" id="infoRatio">
+                        </div>
+                        <div class="killCounts">
+                            <p><b id="infoYourKills">0</b> targets</p>
+                            <p><b id="infoTheirKills">0</b> targets</p>
+                        </div>
+                        
+                        
+                    </div>
+                    <p class="mini" style="text-align: justify; max-width: 65%; display: none;">
+                        Total targets assume active warriors attack targets at most 1.1x their level. (That is 11k for level 10k, 110k for 100k)
+                        Actual kill count will vary based on activity, equipment, and special attacks.
+                    </p>
+                    <div class="memberListNoStyle" id="memberListInspect" style="width: 100%;">
+                        <h2>Attackable Players</h2>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p style="font-size: 12px; width: 100%; text-align: center;">All images on this site are sourced directly from SimpleMMO.</p>
+        <p style="font-size: 12px; width: 100%; text-align: center;">SMMO Guild Tools v.0.2 by TheGravy</p>
+    </footer>
+</body>

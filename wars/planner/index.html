@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<head>
+    <title>SMMO Guild Tools | War Planner</title>
+    <link rel="icon" type="image/x-icon" href="/smmo-guild-tools/favicon.ico">
+    <link rel="stylesheet" href="/smmo-guild-tools/style.css">
+    <meta name="viewport" content="width=device-width">
+    <meta name="application-name" content="SMMO Guild Tools">
+    <meta name="description" content="A collection of useful tools for staff of guilds in SimpleMMO, primarily PvP guilds.">
+    <meta name="keywords" content="simplemmo,guild tools,smmo,simplemmo tools">
+    <script src="/smmo-guild-tools/index.js"></script>
+    <script src="index.js"></script>
+</head>
+<body>
+    <header>
+        <div class="desktopOnlyFlex">
+            
+        </div>
+        <div>
+            <a href='/smmo-guild-tools'><p><b>SMMO Guild Tools</b></p></a>
+        </div>
+        <div>
+            <a id="changelog" href="changelog" style="display: none;">Changelog</a>
+        </div>
+    </header>
+    <div class="tabBar">
+        <a href="/smmo-guild-tools/guild">Guild</a>
+        <a href="/smmo-guild-tools/sgl">SGL</a>
+        <a href="/smmo-guild-tools/wars">Wars</a>
+        <a href="/smmo-guild-tools/settings">Settings</a>
+    </div>
+    <div id="content" style="justify-content: start;">
+        <div>
+            <button style="width: 200px;" onclick="updateGuildList()">Update Inactive Guild List</button>
+            <button style="width: 200px;" onclick="planWars()">Plan Wars</button>
+        </div>
+        <p class="mini" style="text-align: center;">
+            Updating the guild list takes some time, as each API call can only retrieve up to 20 guilds, and then planning wars takes even longer, as each API call can retrieve the status of 1 guild at a time.
+            <br>When updating the guild list or planning wars, the contents of this page will be replaced with a progress indicator.
+            <br><b>Do not do anything with your API key during this process, as you will get ratelimited.</b>
+        </p>
+
+        <div id="warList">
+            <p>You must plan wars before viewing the list.</p>
+        </div>
+    </div>
+    <div id="progress">
+        <p id="progressCounter"></p>
+    </div>
+    <footer>
+        <p style="font-size: 12px; width: 100%; text-align: center;">All images on this site are sourced directly from SimpleMMO.</p>
+        <p style="font-size: 12px; width: 100%; text-align: center;">SMMO Guild Tools v.0.2 by TheGravy</p>
+    </footer>
+</body>
