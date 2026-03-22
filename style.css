@@ -52,7 +52,7 @@ header {
     border-bottom: none;
     justify-content: center;
     min-height: 5vh;
-    button, a {
+    a, button {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -70,7 +70,7 @@ header {
         vertical-align: middle;
         text-decoration: none;
     }
-    button:hover, a:hover {
+    a:hover, button:hover {
         transition-duration: 100ms;
         background-color: rgb(25, 25, 25);
     }
