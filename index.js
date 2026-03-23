@@ -170,11 +170,11 @@ const api = { // Functions which call the SimpleMMO Public API directly
 }
 
 window.onload = async () => {
-    if (window.location.pathname != "/settings" && 
-        window.location.pathname != "/settings/" &&
-        window.location.pathname != "/" && 
+    if (window.location.pathname != "/smmo-guild-tools/settings" && 
+        window.location.pathname != "/smmo-guild-tools/settings/" &&
+        window.location.pathname != "/smmo-guild-tools" && 
         !util.getApiKey()) {
-        window.location.replace("/settings")
+        window.location.replace("/smmo-guild-tools/settings")
     } else {
         let s = await util.getStoredJSON("settings");
         if (s) {
