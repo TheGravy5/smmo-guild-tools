@@ -19,7 +19,7 @@ const memberTemplate = `
 `;
 
 async function getSGL() {
-    const season = 12;
+    const season = 13;
     const apikey = util.getApiKey();
 
     document.getElementById("sgl").innerHTML = '';
