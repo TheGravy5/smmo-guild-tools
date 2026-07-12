@@ -3,14 +3,14 @@ const memberTemplate = `
         <div class="memberInfo">
             <div class="one">
                 <p><a href="https://web.simple-mmo.com/user/view/%id" target=_blank>%name</a></p>
-                %label
+                
                 <p class="level">Level <b>%level</b></p>
             </div>
             <p class="pid">@%id</p>
         </div>
-        <div class="label"><img src="https://web.simple-mmo.com/img/icons/one/icon028.png">
+        <div class="label">%label
             <div>
-                <div>
+                <div class="hoverpopup">
                     %popup
                 </div>
             </div>
@@ -91,16 +91,37 @@ async function inspect(guild_id) {
                     let d = new Date();
                     d.setDate(now.getDate() - inactivityTime);
                     if (d < (new Date(member.last_activity*1000))) {
-                        mem = mem.replace("%label", `<img src="https://web.simple-mmo.com/img/icons/S_Sword09.png">`);
-                        mem = mem.replace("%popup", `<p>Warrior</p><hr><p class=mini>Will attack targets up to 1.1x their level.</p>%popup`)
+                        mem = mem.replace("%label", `<img style="width: 32px;" src="/smmo-guild-tools/assets/sword_with_background.png">`);
+                        mem = mem.replace("%popup", `
+                            <div class="popupheader">
+                                <img style="width: 32px;" src="/smmo-guild-tools/assets/sword_with_background.png">
+                                <p>Warrior</p>
+                            </div>
+                            <hr>
+                            <p class=mini>Attack targets up to 1.1x their level.</p>
+                            %popup`)
                     } else {
-                        mem = mem.replace("%label", `<img  style="filter: grayscale(100%);" src="https://web.simple-mmo.com/img/icons/S_Sword09.png">`);
-                        mem = mem.replace("%popup", `<p>Inactive Warrior</p><hr><p class=mini>Does not contribute kills, but is included in all calculations as a target.</p>`)
+                        mem = mem.replace("%label", `<img style="filter: grayscale(100%); width: 32px;" src="/smmo-guild-tools/assets/sword_with_background.png">`);
+                        mem = mem.replace("%popup", `
+                            <div class="popupheader">
+                                <img style="filter: grayscale(100%); width: 32px;" src="/smmo-guild-tools/assets/sword_with_background.png">
+                                <p>Inactive Warrior</p>
+                            </div>
+                            <hr>
+                            <p class=mini>Does not attack.<br>Included in all calculations as a target.</p>
+                            %popup`)
                     }
                     
                 } else {
-                    mem = mem.replace("%label", ``);
-                    mem = mem.replace("%popup", `<p>Attackable Member</p><hr><p class=mini>Does not contribute kills, but is included in calculations as a target depending on settings.</p>%popup`)
+                    mem = mem.replace("%label", `<img style="width: 32px;" src="/smmo-guild-tools/assets/shield.png">`);
+                    mem = mem.replace("%popup", `
+                        <div class="popupheader">
+                                <img style="width: 32px;" src="/smmo-guild-tools/assets/shield.png">
+                                <p>Attackable Member</p>
+                            </div>
+                            <hr>
+                            <p class=mini>Does not attack.<br>Included in calculations as a target depending on the "Include non-warriors in calculations" setting toggle.</p>
+                            %popup`)
                 }
                 mem = mem.replace("%bg", bg);
                 mem = mem.replace("%popup", ``)

@@ -52,7 +52,7 @@ header {
     border-bottom: none;
     justify-content: center;
     min-height: 5vh;
-    a, button {
+    button, a {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -70,7 +70,7 @@ header {
         vertical-align: middle;
         text-decoration: none;
     }
-    a:hover, button:hover {
+    button:hover, a:hover {
         transition-duration: 100ms;
         background-color: rgb(25, 25, 25);
     }
@@ -209,9 +209,11 @@ header {
         div {
             position: absolute;
             left: -50%;
-            top: -1%;
-            div {
+            top: -10px;
+            
+            .hoverpopup {
                 display: none;
+                z-index: 2;
                 flex-direction: column;
                 align-items: center;
                 opacity: 0;
@@ -224,16 +226,43 @@ header {
                 position: absolute;
                 left: -175px;
                 top: auto;
-                bottom: 15px;
+                bottom: 0;
                 right: calc(100vw - 25px);
+                .popupheader {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    position:relative;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    p {
+                        width: fit-content;
+                    }
+                }
                 p {
                     text-align: center;
+                    width: calc(100% - 16px);
                 }
                 hr {
-                    width: 100%;
+                    width: 10%;
+                    margin-top: -4px;
                     border: 1px solid white;
+                    border-left: 10px solid rgba(25, 25, 25, 0.5);
+                    border-right: 10px solid rgba(25, 25, 25, 0.5);
                 }
-            }        
+            }
+            .hoverpopup:after {
+                position: absolute;
+                z-index: 1;
+                content: "";
+                right: calc(50% - 90px);
+                bottom: -10px;
+                border-style: solid;
+                border-width: 10px 10px 0 10px;
+                border-color: white transparent transparent transparent;
+            }
 
         }
     }
