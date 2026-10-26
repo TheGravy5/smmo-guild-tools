@@ -29,25 +29,34 @@ async function guildFetchProcess(arr, page, apikey, res) {
 }
 
 async function guildInfoFetchProcess(arr, num, list, apikey, res) {
-    console.log(list[num]);
-    const guild = await api.getGuildInfo(list[num].id, apikey);
+    try {
+        console.log(list[num]);
+        const guild = await api.getGuildInfo(list[num].id, apikey);
+        
+        delete guild.members;
+        console.log(guild);
+        if ( (true || guild.eligible_for_guild_war) && (guild.member_count >= 10) ) {
+            arr.push(guild)
+        }
+        console.log(num);
+        const mins = Math.trunc((list.length - (num+1)) / 30)
+        const secs = (list.length - (num+1))*2 % 60;
+        document.getElementById("progressCounter").textContent = `Determining best war targets... ${num+1} out of ${list.length} - at least ${mins} minutes ${secs} seconds remaining.`;
     
-    delete guild.members;
-    console.log(guild);
-    if ( (true || guild.eligible_for_guild_war) && (guild.member_count >= 10) ) {
-        arr.push(guild)
-    }
-    console.log(num);
-    const mins = Math.trunc((list.length - (num+1)) / 30)
-    const secs = (list.length - (num+1))*2 % 60;
-    document.getElementById("progressCounter").textContent = `Determining best war targets... ${num+1} out of ${list.length} - at least ${mins} minutes ${secs} seconds remaining.`;
-
-    if (num+1 < list.length) {
+        if (num+1 < list.length) {
+            setTimeout(async() => {
+                num++;
+                guildInfoFetchProcess(arr, num, list, apikey, res)
+            }, 2000);
+        } else res(arr);
+    } catch (e) {
+        console.error(e);
+        console.log("Retrying in 2 seconds..."
         setTimeout(async() => {
             num++;
             guildInfoFetchProcess(arr, num, list, apikey, res)
         }, 2000);
-    } else res(arr);
+    }
 }
 
 async function planWars() {
