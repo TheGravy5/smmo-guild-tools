@@ -51,7 +51,7 @@ async function guildInfoFetchProcess(arr, num, list, apikey, res) {
         } else res(arr);
     } catch (e) {
         console.error(e);
-        console.log("Retrying in 2 seconds..."
+        console.log("Retrying in 2 seconds...");
         setTimeout(async() => {
             num++;
             guildInfoFetchProcess(arr, num, list, apikey, res)
